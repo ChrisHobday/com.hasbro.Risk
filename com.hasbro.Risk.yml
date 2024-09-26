@@ -1,12 +1,12 @@
 app-id: com.hasbro.Risk
 sdk: org.freedesktop.Sdk
 runtime: org.freedesktop.Platform
-runtime-version: &runtime-version '24.08'
+runtime-version: &runtime-version '23.08'
 base: org.winehq.Wine
 base-version: stable-23.08
-# command: RiskWrapper
-# rename-desktop-file: risk.desktop
-# rename-icon: risk
+command: RiskWrapper
+rename-desktop-file: Risk.desktop
+rename-icon: Risk
 finish-args:
   - --device=all
   - --filesystem=host:ro
@@ -22,36 +22,36 @@ inherit-extensions:
   - org.winehq.Wine.mono
   - org.winehq.Wine.DLLs
 modules:
-  # # Icoutils, needed for extracting .ico from BattleNetSetup.exe
-  # - name: Icoutils
-  #   buildsystem: simple
-  #   sources:
-  #     - type: archive
-  #       url: http://savannah.nongnu.org/download/icoutils/icoutils-0.32.3.tar.bz2
-  #       sha256: 17abe02d043a253b68b47e3af69c9fc755b895db68fdc8811786125df564c6e0
-  #   build-commands:
-  #     - |
-  #       echo "Configuring and make Icoutls"
-  #       ./configure --prefix=${FLATPAK_DEST}
-  #       make
+  # Icoutils, needed for extracting .ico from BattleNetSetup.exe
+  - name: Icoutils
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: http://savannah.nongnu.org/download/icoutils/icoutils-0.32.3.tar.bz2
+        sha256: 17abe02d043a253b68b47e3af69c9fc755b895db68fdc8811786125df564c6e0
+    build-commands:
+      - |
+        echo "Configuring and make Icoutls"
+        ./configure --prefix=${FLATPAK_DEST}
+        make
 
-  #       echo "Installing Icoutils"
-  #       make install
-  # # ImageMagick, needed for converting .ico extracted from exe to .png
-  # - name: ImageMagick
-  #   buildsystem: simple
-  #   sources:
-  #     - type: git
-  #       url: https://github.com/ImageMagick/ImageMagick.git
-  #       tag: 7.1.1-36
-  #   build-commands:
-  #     - |
-  #       echo "Configuring and make ImageMagick"
-  #       ./configure --prefix=${FLATPAK_DEST}
-  #       make
+        echo "Installing Icoutils"
+        make install
+  # ImageMagick, needed for converting .ico extracted from exe to .png
+  - name: ImageMagick
+    buildsystem: simple
+    sources:
+      - type: git
+        url: https://github.com/ImageMagick/ImageMagick.git
+        tag: 7.1.1-36
+    build-commands:
+      - |
+        echo "Configuring and make ImageMagick"
+        ./configure --prefix=${FLATPAK_DEST}
+        make
 
-  #       echo "Installing ImageMagick"
-  #       make install
+        echo "Installing ImageMagick"
+        make install
   - name: Risk
     buildsystem: simple
     sources:
@@ -59,45 +59,40 @@ modules:
       - type: file
         path: com.hasbro.Risk.metainfo.xml
       # The Windows exe that will be ran with wine to install Risk (If it is already installed, the exe instead launches Risk)
-      - type: file
-        url: https://www.myabandonware.com/download/lzbu-risk-the-game-of-global-domination
-        sha256: f804fb86f0ed866120ed8b82110ee52d5512f0803c965509306bf21f8c88374a
-        dest-filename: Risk
-      # # Shell script that extracts BattleNet icon from the BattleNetSetup.exe, converts it to different sized png files and move those to the correct icon locations
-      # - type: shell
-      #   commands:
-      #     - |
-      #       echo "Extracting BattleNet icon from BattleNetSetup.exe"
-      #       wrestool -x --output=BattleNet.ico -t14 BattleNetSetup.exe
+      - type: dir
+        path: Risk-The-Game-of-Global-Domination_Win_EN_LGU-Repack-by-Bladez1992
+      # Shell script that extracts BattleNet icon from the BattleNetSetup.exe, converts it to different sized png files and move those to the correct icon locations
+      - type: shell
+        commands:
+          - |
+            echo "Extracting Risk icon from Risk Classic Collection.exe"
+            wrestool -x --output=Risk.ico -t14 "Risk Classic Collection.exe"
 
-      #       echo "Converting BattleNet.ico to BattleNet.png"
-      #       convert BattleNet.ico BattleNet.png
+            echo "Converting BattleNet.ico to BattleNet.png"
+            convert Risk.ico Risk.png
 
-      #       echo "Moving BattleNet-6.png to /app/share/icons/hicolor/64x64/apps/BattleNet.png"
-      #       mv BattleNet-6.png /app/share/icons/hicolor/64x64/apps/BattleNet.png
+            echo "Creating directory /app/share/icons/hicolor/32x32/apps"
+            mkdir -p /app/share/icons/hicolor/32x32/apps
 
-      #       echo "Moving BattleNet-0.png to /app/share/icons/hicolor/128x128/apps/BattleNet.png"
-      #       mv BattleNet-0.png /app/share/icons/hicolor/128x128/apps/BattleNet.png
+            echo "Moving Risk.png to /app/share/icons/hicolor/32x32/apps/Risk.png"
+            mv Risk.png /app/share/icons/hicolor/32x32/apps/Risk.png
+      # Shell script that creates a BattleNet.desktop file in the correct location
+      - type: shell
+        commands:
+          - |
+            echo "Creating /app/share/applications/Risk.desktop file"
+            touch /app/share/applications/Risk.desktop
 
-      #       echo "Moving BattleNet-3.png to /app/share/icons/hicolor/256x256/apps/BattleNet.png"
-      #       mv BattleNet-3.png /app/share/icons/hicolor/256x256/apps/BattleNet.png
-      # # Shell script that creates a BattleNet.desktop file in the correct location
-      # - type: shell
-      #   commands:
-      #     - |
-      #       echo "Creating /app/share/applications/BattleNet.desktop file"
-      #       touch /app/share/applications/BattleNet.desktop
-
-      #       echo "Writing contents to /app/share/applications/BattleNet.desktop file"
-      #       echo "[Desktop Entry]
-      #       Type=Application
-      #       Name=BattleNet
-      #       GenericName=BattleNet
-      #       Comment=Blizzard BattleNet launcher (Flatpak)
-      #       Exec=BattleNetWrapper
-      #       Categories=Game;
-      #       Icon=BattleNet
-      #       Keywords=Blizzard;BattleNet;Battle.net;Hearthstone;World of Warcraft;StarCraft;Warcraft;Overwatch;Diablo;Heroes of the Storm;Warcraft Rumble" >> /app/share/applications/BattleNet.desktop
+            echo "Writing contents to /app/share/applications/BattleNet.desktop file"
+            echo "[Desktop Entry]
+            Type=Application
+            Name=Risk
+            GenericName=Risk
+            Comment=Risk: The Game of Global Domination (1996) (Flatpak)
+            Exec=RiskWrapper
+            Categories=Game;
+            Icon=Risk
+            Keywords=Risk" >> /app/share/applications/Risk.desktop
       # Script that is ran everytime the final Flatpak is ran, which sets up Discord rich presence and than runs the BattleNetSetup.exe with Wine
       - type: script
         commands:
@@ -108,8 +103,8 @@ modules:
                 ln -sf {app/com.discordapp.Discord,$XDG_RUNTIME_DIR}/discord-ipc-$i;
             done
 
-            echo "Launching Risk.exe"
-            wine /app/bin/Risk.exe
+            echo "Launching RISKCC.msi"
+            wine /app/bin/RISKCC.msi
         dest-filename: RiskWrapper
     build-commands:
       - |
@@ -117,7 +112,13 @@ modules:
         install -Dm644 -t /app/share/metainfo/ com.hasbro.Risk.metainfo.xml
 
         echo "Moving Risk Classic Collection.exe to /app/bin"
-        mv Risk/'Risk Classic Collection.exe' /app/bin
+        mv "Risk Classic Collection.exe" /app/bin
+
+        echo "Moving RISKCC.msi to /app/bin"
+        mv RISKCC.msi /app/bin
+
+        # echo "Moving RISKCC1.cab to /app/bin"
+        # mv RISKCC1.cab /app/bin
 
         echo "Moving RiskWrapper to /app/bin"
         mv RiskWrapper /app/bin
