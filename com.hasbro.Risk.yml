@@ -122,8 +122,11 @@ modules:
               echo "Making /var/data/WinePrefix/drive_c/Games"
               mkdir /var/data/WinePrefix/drive_c/Games
 
-              echo "Copying /app/share/Risk to /var/data/WinePrefix/drive_c/Games/Risk"
+              echo "Copying /app/share/RiskCD to /var/data/WinePrefix/drive_c/Games/RiskCD (to satisfy risk CDPATH)"
               cp -r /app/share/Risk /var/data/WinePrefix/drive_c/Games/Risk
+
+              echo "Copying /app/share/RiskCD to /var/data/WinePrefix/drive_c/Games/Risk (to act as Risk installation dir)"
+              cp -r /app/share/RiskCD /var/data/WinePrefix/drive_c/Games/Risk
 
               echo "Updating Windows registry with Risk paths"
               wine regedit /app/share/Risk.reg
@@ -155,11 +158,11 @@ modules:
         echo "Moving Risk.desktop to /app/share/applications"
         mv Risk.desktop /app/share/applications
 
-        echo "Moving RiskCD to /app/share/Risk"
-        mv RiskCD /app/share/Risk
+        echo "Moving RiskCD to /app/share/RiskCD"
+        mv RiskCD /app/share/RiskCD
 
-        echo "Moving/overwriting 1.1 patched RISK.EXE to /app/share/Risk/risk.exe "
-        mv RISK.EXE /app/share/Risk/risk.exe
+        echo "Moving/Overwriting 1.1 patched RISK.EXE to /app/share/RiskCD/risk.exe "
+        mv RISK.EXE /app/share/RiskCD/risk.exe
 
         echo "Moving Risk.reg to /app/share"
         mv Risk.reg /app/share
