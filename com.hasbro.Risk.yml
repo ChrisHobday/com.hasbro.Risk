@@ -65,14 +65,17 @@ modules:
       # Metadata file for Flatpak repos
       - type: file
         path: com.hasbro.Risk.metainfo.xml
-      # Risk installation directory
-      - type: dir
-        path: Risk
-        dest: Risk
-      # Risk CD directory with all the files on the Risk CD
-      - type: dir
-        path: RiskCD
+      # Risk CD/ISO
+      - type: archive
+        archive-type: 7z
+        strip-components: 0
+        url: https://archive.org/download/risk96/RISK.iso
+        sha256: 1f11da4878707a2ebb4d5e3c6ea9cbb14a14875f245300dc5b3ca21026d11387
         dest: RiskCD
+      # RISK.EXE 1.1 patch
+      - type: archive
+        url: https://d2.myabandonware.com/t/cff71cd4-570b-4179-85f1-32b9879f69c3/Risk-The-Game-of-Global-Domination_Patch_Win_EN_Patch-11.zip
+        sha256: 2e95abf393f93cc90d8ca6b6898cb4290ef82bccb872049725619d4f1b39b33e
       # Windows registry file that sets Risk paths
       - type: file
         path: Risk.reg
@@ -86,8 +89,8 @@ modules:
             # echo "Extracting Risk icon from Risk Classic Collection.exe"
             # wrestool -x --output=Risk.ico -t14 "Risk Classic Collection.exe"
 
-            echo "Converting Risk.ico to Risk.png"
-            convert RiskCD/RISK.ICO Risk.png
+            echo "Converting RiskCD/risk.ico to Risk.png"
+            convert RiskCD/risk.ico Risk.png
 
             echo "Creating directory /app/share/icons/hicolor/32x32/apps"
             mkdir -p /app/share/icons/hicolor/32x32/apps
@@ -127,7 +130,8 @@ modules:
               cd /var/data/WinePrefix/drive_c/Games/Risk
 
               echo "Launching Risk"
-              wine /var/data/WinePrefix/drive_c/Games/Risk/RISK.EXE
+              wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
+              # wine explorer /desktop=Risk,1024x768 /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
             else
               echo "Installing Risk"
               echo "Initializing Wine prefix"
@@ -139,41 +143,42 @@ modules:
               echo "Copying /app/share/Risk to /var/data/WinePrefix/drive_c/Games/Risk"
               cp -r /app/share/Risk /var/data/WinePrefix/drive_c/Games/Risk
 
-              echo "Copying /app/share/RiskCD to /var/data/WinePrefix/drive_c/Games/RiskCD"
-              cp -r /app/share/RiskCD /var/data/WinePrefix/drive_c/Games/RiskCD
-
               echo "Updating Windows registry with Risk paths"
               wine regedit /app/share/Risk.reg
 
               echo "Updating Windows registry with Wine emulate virtual desktop"
               wine regedit /app/share/WineEmulateVirtualDesktop.reg
 
-              # wine reg ADD "HKCU\\Software\Wine\Explorer" /v Desktop /d Default
-              # wine reg ADD "HKCU\\Software\Wine\Explorer\Desktops" /v Default /d 1024x786
+              echo "Waiting for registry updates to be applied"
+              sleep 4
 
               echo "Changing directory to /var/data/WinePrefix/drive_c/Games/Risk"
               cd /var/data/WinePrefix/drive_c/Games/Risk
 
               echo "Launching Risk with Wine"
-              wine /var/data/WinePrefix/drive_c/Games/Risk/RISK.EXE
+              wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
+              # wine explorer /desktop=Risk,1024x768 /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
             fi
         dest-filename: RiskWrapper
         # Script that is ran when Flatpak launches, which starts GameScope in fullscreen with the SDL backend and then runs the RiskWrapper
       - type: script
         commands:
           - |
-            gamescope -f --backend sdl -- RiskWrapper
+            gamescope -f -- RiskWrapper
         dest-filename: GameScopeWrapper
     build-commands:
       - |
         echo "Installing com.hasbro.Risk.metainfo.xml in /app/share/metainfo/"
         install -Dm644 -t /app/share/metainfo/ com.hasbro.Risk.metainfo.xml
 
-        echo "Moving Risk to /app/share"
-        mv Risk /app/share
+        # echo "Moving Risk to /app/share"
+        # mv Risk /app/share
 
-        echo "Moving RiskCD to /app/share"
-        mv RiskCD /app/share
+        echo "Moving RiskCD to /app/share/Risk"
+        mv RiskCD /app/share/Risk
+
+        echo "Moving/overwriting 1.1 patched RISK.EXE to /app/share/Risk/risk.exe "
+        mv RISK.EXE /app/share/Risk/risk.exe
 
         echo "Moving Risk.reg to /app/share"
         mv Risk.reg /app/share
