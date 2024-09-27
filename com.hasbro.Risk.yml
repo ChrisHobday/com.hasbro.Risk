@@ -123,7 +123,7 @@ modules:
               mkdir /var/data/WinePrefix/drive_c/Games
 
               echo "Copying /app/share/RiskCD to /var/data/WinePrefix/drive_c/Games/RiskCD (to satisfy risk CDPATH)"
-              cp -r /app/share/Risk /var/data/WinePrefix/drive_c/Games/Risk
+              cp -r /app/share/RiskCD /var/data/WinePrefix/drive_c/Games/RiskCD
 
               echo "Copying /app/share/RiskCD to /var/data/WinePrefix/drive_c/Games/Risk (to act as Risk installation dir)"
               cp -r /app/share/RiskCD /var/data/WinePrefix/drive_c/Games/Risk
