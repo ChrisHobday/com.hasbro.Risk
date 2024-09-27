@@ -65,6 +65,9 @@ modules:
       # Metadata file for Flatpak repos
       - type: file
         path: com.hasbro.Risk.metainfo.xml
+      # Desktop file for Risk
+      - type: file
+        path: Risk.desktop
       # Risk CD/ISO
       - type: archive
         archive-type: 7z
@@ -86,9 +89,6 @@ modules:
       - type: shell
         commands:
           - |
-            # echo "Extracting Risk icon from Risk Classic Collection.exe"
-            # wrestool -x --output=Risk.ico -t14 "Risk Classic Collection.exe"
-
             echo "Converting RiskCD/risk.ico to Risk.png"
             convert RiskCD/risk.ico Risk.png
 
@@ -97,23 +97,6 @@ modules:
 
             echo "Moving Risk.png to /app/share/icons/hicolor/32x32/apps/Risk.png"
             mv Risk.png /app/share/icons/hicolor/32x32/apps/Risk.png
-      # Shell script that creates a Risk.desktop file in the correct location
-      - type: shell
-        commands:
-          - |
-            echo "Creating /app/share/applications/Risk.desktop file"
-            touch /app/share/applications/Risk.desktop
-
-            echo "Writing contents to /app/share/applications/Risk.desktop file"
-            echo "[Desktop Entry]
-            Type=Application
-            Name=Risk
-            GenericName=Risk
-            Comment=Risk: The Game of Global Domination (1996) (Flatpak)
-            Exec=GameScopeWrapper
-            Categories=Game;
-            Icon=Risk
-            Keywords=Risk" >> /app/share/applications/Risk.desktop
       # Script that is ran from the GameScopeWrapper after the Flatpak is launched, which sets up Discord Rich Presence, installs Risk if it's not already, and launches it with Wine
       - type: script
         commands:
@@ -131,7 +114,6 @@ modules:
 
               echo "Launching Risk"
               wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
-              # wine explorer /desktop=Risk,1024x768 /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
             else
               echo "Installing Risk"
               echo "Initializing Wine prefix"
@@ -157,22 +139,21 @@ modules:
 
               echo "Launching Risk with Wine"
               wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
-              # wine explorer /desktop=Risk,1024x768 /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
             fi
         dest-filename: RiskWrapper
         # Script that is ran when Flatpak launches, which starts GameScope in fullscreen with the SDL backend and then runs the RiskWrapper
       - type: script
         commands:
           - |
-            gamescope -f -- RiskWrapper
+            gamescope -f -- RiskWrapper # TODO: Find fix for GameScope not properly closing when Wine does
         dest-filename: GameScopeWrapper
     build-commands:
       - |
         echo "Installing com.hasbro.Risk.metainfo.xml in /app/share/metainfo/"
         install -Dm644 -t /app/share/metainfo/ com.hasbro.Risk.metainfo.xml
 
-        # echo "Moving Risk to /app/share"
-        # mv Risk /app/share
+        echo "Moving Risk.desktop to /app/share/applications"
+        mv Risk.desktop /app/share/applications
 
         echo "Moving RiskCD to /app/share/Risk"
         mv RiskCD /app/share/Risk

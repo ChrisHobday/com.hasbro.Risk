@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Risk
+GenericName=Risk
+Comment=Risk: The Game of Global Domination (1996) (Unofficial) (Flatpak)
+Exec=GameScopeWrapper
+Categories=Game;
+Icon=Risk
+Keywords=Risk
