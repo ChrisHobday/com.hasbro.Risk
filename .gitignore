@@ -9,6 +9,3 @@
 
 # Flatpak repo
 /repo
-
-# Risk directory
-/Risk*
