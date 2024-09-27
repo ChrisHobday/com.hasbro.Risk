@@ -17,12 +17,17 @@ finish-args:
   - --share=network
   - --share=ipc
   - --allow=multiarch
+  - --env=WINEPREFIX=/var/data/WinePrefix
 inherit-extensions:
+  - org.freedesktop.Platform.Compat.i386
+  - org.freedesktop.Platform.GL32
+  - org.freedesktop.Platform.ffmpeg-full
+  - org.freedesktop.Platform.ffmpeg_full.i386
   - org.winehq.Wine.gecko
   - org.winehq.Wine.mono
   - org.winehq.Wine.DLLs
 modules:
-  # Icoutils, needed for extracting .ico from BattleNetSetup.exe
+  # Icoutils, needed for extracting .ico from Risk Classic Collection.exe
   - name: Icoutils
     buildsystem: simple
     sources:
@@ -52,23 +57,28 @@ modules:
 
         echo "Installing ImageMagick"
         make install
+  # Risk installer files, icon and desktop file creation shell scripts, and wrapper script for launching
   - name: Risk
     buildsystem: simple
     sources:
       # Metadata file for Flatpak repos
       - type: file
         path: com.hasbro.Risk.metainfo.xml
-      # The Windows exe that will be ran with wine to install Risk (If it is already installed, the exe instead launches Risk)
+      # Directory containing Risk installation exe and needed files for installation
       - type: dir
         path: Risk-The-Game-of-Global-Domination_Win_EN_LGU-Repack-by-Bladez1992
-      # Shell script that extracts BattleNet icon from the BattleNetSetup.exe, converts it to different sized png files and move those to the correct icon locations
+      # Risk CD directory with all the files on the Risk CD
+      - type: dir
+        path: RiskCD
+        dest: RiskCD
+      # Shell script that extracts Risk icon from the Risk Classic Collection.exe, converts it to different sized png files and move those to the correct icon locations
       - type: shell
         commands:
           - |
             echo "Extracting Risk icon from Risk Classic Collection.exe"
             wrestool -x --output=Risk.ico -t14 "Risk Classic Collection.exe"
 
-            echo "Converting BattleNet.ico to BattleNet.png"
+            echo "Converting Risk.ico to Risk.png"
             convert Risk.ico Risk.png
 
             echo "Creating directory /app/share/icons/hicolor/32x32/apps"
@@ -76,14 +86,14 @@ modules:
 
             echo "Moving Risk.png to /app/share/icons/hicolor/32x32/apps/Risk.png"
             mv Risk.png /app/share/icons/hicolor/32x32/apps/Risk.png
-      # Shell script that creates a BattleNet.desktop file in the correct location
+      # Shell script that creates a Risk.desktop file in the correct location
       - type: shell
         commands:
           - |
             echo "Creating /app/share/applications/Risk.desktop file"
             touch /app/share/applications/Risk.desktop
 
-            echo "Writing contents to /app/share/applications/BattleNet.desktop file"
+            echo "Writing contents to /app/share/applications/Risk.desktop file"
             echo "[Desktop Entry]
             Type=Application
             Name=Risk
@@ -93,7 +103,7 @@ modules:
             Categories=Game;
             Icon=Risk
             Keywords=Risk" >> /app/share/applications/Risk.desktop
-      # Script that is ran everytime the final Flatpak is ran, which sets up Discord rich presence and than runs the BattleNetSetup.exe with Wine
+      # Script that is ran everytime the final Flatpak is ran, which sets up Discord rich presence and then runs the Risk Classic Collection.exe with Wine
       - type: script
         commands:
           - |
@@ -103,8 +113,13 @@ modules:
                 ln -sf {app/com.discordapp.Discord,$XDG_RUNTIME_DIR}/discord-ipc-$i;
             done
 
-            echo "Launching RISKCC.msi"
-            wine /app/bin/RISKCC.msi
+            echo "Checking if Risk is already installed"
+            if [ -d "$/var/data/WinePrefix/drive_c/Games" ]; then
+              echo "$DIRECTORY does exist."
+            fi
+
+            echo "Launching Risk Classic Collection.exe"
+            wine "/app/bin/Risk Classic Collection.exe"
         dest-filename: RiskWrapper
     build-commands:
       - |
@@ -117,8 +132,11 @@ modules:
         echo "Moving RISKCC.msi to /app/bin"
         mv RISKCC.msi /app/bin
 
-        # echo "Moving RISKCC1.cab to /app/bin"
-        # mv RISKCC1.cab /app/bin
+        echo "Moving RISKCC1.cab to /app/bin"
+        mv RISKCC1.cab /app/bin
+
+        echo "Moving RiskCD to /app/share"
+        mv RiskCD /app/share
 
         echo "Moving RiskWrapper to /app/bin"
         mv RiskWrapper /app/bin
