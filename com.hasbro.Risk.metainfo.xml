@@ -3,7 +3,7 @@
   <id>com.hasbro.Risk</id>
   
   <name>Risk</name>
-  <summary>Risk: The Game of Global Domination (1996) (Unofficial)</summary>
+  <summary>Risk: The Game of Global Domination (1996) (Unofficial) (Flatpak)</summary>
   
   <metadata_license>CC-BY-SA-3.0</metadata_license>
   <project_license>GPL-2.0+</project_license>
@@ -15,12 +15,12 @@
   
   <description>
     <p>
-      Risk: The Game of Global Domination (1996) Flatpak (ran with Wine) (Unofficial)
+      Risk: The Game of Global Domination (1996) (Unofficial) (Flatpak)
     </p>
   </description>
 
   <releases>
-    <release version="1" date="2024-09-25"/>
+    <release version="1.0" date="2024-09-28"/>
   </releases>
   
   <launchable type="desktop-id">com.hasbro.Risk.desktop</launchable>
