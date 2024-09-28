@@ -75,7 +75,6 @@ modules:
         url: https://archive.org/download/risk96/RISK.iso
         sha256: 1f11da4878707a2ebb4d5e3c6ea9cbb14a14875f245300dc5b3ca21026d11387
         dest: RiskCD
-      # https://d2.myabandonware.com/t/e4baadf8-45ca-45de-ab7c-2fb19cf425fc/Risk-The-Game-of-Global-Domination_Win_EN_ISO-Version.zip
       # RISK.EXE 1.1 patch
       - type: archive
         url: https://d2.myabandonware.com/t/cff71cd4-570b-4179-85f1-32b9879f69c3/Risk-The-Game-of-Global-Domination_Patch_Win_EN_Patch-11.zip
