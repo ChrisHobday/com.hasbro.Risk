@@ -75,6 +75,7 @@ modules:
         url: https://archive.org/download/risk96/RISK.iso
         sha256: 1f11da4878707a2ebb4d5e3c6ea9cbb14a14875f245300dc5b3ca21026d11387
         dest: RiskCD
+      # https://d2.myabandonware.com/t/e4baadf8-45ca-45de-ab7c-2fb19cf425fc/Risk-The-Game-of-Global-Domination_Win_EN_ISO-Version.zip
       # RISK.EXE 1.1 patch
       - type: archive
         url: https://d2.myabandonware.com/t/cff71cd4-570b-4179-85f1-32b9879f69c3/Risk-The-Game-of-Global-Domination_Patch_Win_EN_Patch-11.zip
@@ -82,9 +83,9 @@ modules:
       # Windows registry file that sets Risk paths
       - type: file
         path: Risk.reg
-      # Windows registry file that sets Wine to emulate a virtual desktop
+      # Windows registry file that sets Wine to grab cursor in fullscreen, emulate a virtual desktop and set desktop resolution
       - type: file
-        path: WineEmulateVirtualDesktop.reg
+        path: WineGraphics.reg
       # Shell script that extracts Risk icon from the Risk Classic Collection.exe, converts it to different sized png files and move those to the correct icon locations
       - type: shell
         commands:
@@ -132,10 +133,10 @@ modules:
               wine regedit /app/share/Risk.reg
 
               echo "Updating Windows registry with Wine emulate virtual desktop"
-              wine regedit /app/share/WineEmulateVirtualDesktop.reg
+              wine regedit /app/share/WineGraphics.reg
 
               echo "Waiting for registry updates to be applied"
-              sleep 4
+              sleep 3
 
               echo "Changing directory to /var/data/WinePrefix/drive_c/Games/Risk"
               cd /var/data/WinePrefix/drive_c/Games/Risk
@@ -148,7 +149,8 @@ modules:
       - type: script
         commands:
           - |
-            gamescope -f -- RiskWrapper # TODO: Find fix for GameScope not properly closing when Wine does
+            echo "Running GameScope in fullscreen with NIS upscaling filter and launching the RiskWrapper within"
+            gamescope -f --filter nis --backend sdl --expose-wayland -- RiskWrapper # TODO: Find fix for GameScope not properly closing when Wine does
         dest-filename: GameScopeWrapper
     build-commands:
       - |
@@ -167,8 +169,8 @@ modules:
         echo "Moving Risk.reg to /app/share"
         mv Risk.reg /app/share
 
-        echo "Moving WineEmulateVirtualDesktop.reg to /app/share"
-        mv WineEmulateVirtualDesktop.reg /app/share
+        echo "Moving WineGraphics.reg to /app/share"
+        mv WineGraphics.reg /app/share
 
         echo "Moving RiskWrapper to /app/bin"
         mv RiskWrapper /app/bin
