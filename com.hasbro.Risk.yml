@@ -98,24 +98,15 @@ modules:
 
             echo "Moving Risk.png to /app/share/icons/hicolor/32x32/apps/Risk.png"
             mv Risk.png /app/share/icons/hicolor/32x32/apps/Risk.png
-      # Script that is ran from the GameScopeWrapper after the Flatpak is launched, which sets up Discord Rich Presence, installs Risk if it's not already, and launches it with Wine
+      # Script that sets up Wine and installs Risk if it's not already
       - type: script
         commands:
           - |
-            echo "Setting up Discord rich presence"
-            for i in {0..9}; do
-              test -S $XDG_RUNTIME_DIR/discord-ipc-$i ||
-                ln -sf {app/com.discordapp.Discord,$XDG_RUNTIME_DIR}/discord-ipc-$i;
-            done
-
             echo "Checking if Risk is already installed"
             if [ -d /var/data/WinePrefix/drive_c/Games/Risk ]; then
-              echo "Changing directory to /var/data/WinePrefix/drive_c/Games/Risk"
-              cd /var/data/WinePrefix/drive_c/Games/Risk
-
-              echo "Launching Risk"
-              wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
+              echo "Risk is installed"
             else
+              echo "Risk is not installed"
               echo "Installing Risk"
               echo "Initializing Wine prefix"
               wineboot -i
@@ -132,25 +123,32 @@ modules:
               echo "Updating Windows registry with Risk paths"
               wine regedit /app/share/Risk.reg
 
-              echo "Updating Windows registry with Wine emulate virtual desktop"
+              echo "Updating Windows registry with Wine graphics keys"
               wine regedit /app/share/WineGraphics.reg
 
               echo "Waiting for registry updates to be applied"
               sleep 3
-
-              echo "Changing directory to /var/data/WinePrefix/drive_c/Games/Risk"
-              cd /var/data/WinePrefix/drive_c/Games/Risk
-
-              echo "Launching Risk with Wine"
-              wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
             fi
-        dest-filename: RiskWrapper
+        dest-filename: RiskInstaller
+      # Script that changes to installation directory of Risk and launches it with Wine
+      - type: script
+        commands:
+          - |
+            echo "Changing directory to /var/data/WinePrefix/drive_c/Games/Risk"
+            cd /var/data/WinePrefix/drive_c/Games/Risk
+
+            echo "Launching Risk with Wine"
+            wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
+        dest-filename: RiskLauncher
         # Script that is ran when Flatpak launches, which starts GameScope in fullscreen with the SDL backend and then runs the RiskWrapper
       - type: script
         commands:
           - |
-            echo "Running GameScope in fullscreen with NIS upscaling filter and launching the RiskWrapper within"
-            gamescope -f --filter nis --backend sdl --expose-wayland -- RiskWrapper # TODO: Find fix for GameScope not properly closing when Wine does
+            echo "Running Risk installer"
+            RiskInstaller
+
+            echo "Running GameScope in fullscreen with NIS upscaling filter and launching the RiskLauncher within"
+            gamescope -f --filter nis --backend sdl --expose-wayland -- RiskLauncher
         dest-filename: GameScopeWrapper
     build-commands:
       - |
@@ -172,8 +170,11 @@ modules:
         echo "Moving WineGraphics.reg to /app/share"
         mv WineGraphics.reg /app/share
 
-        echo "Moving RiskWrapper to /app/bin"
-        mv RiskWrapper /app/bin
+        echo "Moving RiskInstaller to /app/bin"
+        mv RiskInstaller /app/bin
+
+        echo "Moving RiskLauncher to /app/bin"
+        mv RiskLauncher /app/bin
 
         echo "Moving GameScopeWrapper to /app/bin"
         mv GameScopeWrapper /app/bin
