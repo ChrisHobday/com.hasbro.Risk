@@ -43,6 +43,8 @@ modules:
 
         echo "Installing Icoutils"
         make install
+    cleanup:
+      - '*'
   # ImageMagick, needed for converting .ico extracted from exe to .png
   - name: ImageMagick
     buildsystem: simple
@@ -58,6 +60,8 @@ modules:
 
         echo "Installing ImageMagick"
         make install
+    cleanup:
+      - '*'
   # Risk installer files, icon and desktop file creation shell scripts, and wrapper script for launching
   - name: Risk
     buildsystem: simple
