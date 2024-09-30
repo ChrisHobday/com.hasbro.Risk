@@ -62,6 +62,20 @@ modules:
         make install
     cleanup:
       - '*'
+  # Upscayl, needed for upscaling png to higher resolutions
+  - name: Upscayl
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://github.com/upscayl/upscayl/releases/download/v2.11.5/upscayl-2.11.5-linux.zip
+        sha256: 7570a3e9a803480952d611662f5e5af8fc6cce00bcbff51dea3fc8e7b0cf3890
+        dest: Upscayl
+    build-commands:
+      - |
+        mv Upscayl/bin/upscayl-bin /app/bin/upscayl
+        mv Upscayl/models /app/bin
+    cleanup:
+      - '*'
   # Risk installer files, icon and desktop file creation shell scripts, and wrapper script for launching
   - name: Risk
     buildsystem: simple
@@ -89,18 +103,36 @@ modules:
       # Windows registry file that sets Wine to grab cursor in fullscreen, emulate a virtual desktop and set desktop resolution
       - type: file
         path: WineGraphics.reg
-      # Shell script that extracts Risk icon from the Risk Classic Collection.exe, converts it to different sized png files and move those to the correct icon locations
+      # Shell script that extracts Risk icon from the Risk Classic Collection.exe, converts/upscales it to different sized png files and move those to the correct icon locations
       - type: shell
         commands:
           - |
-            echo "Converting RiskCD/risk.ico to Risk.png"
-            convert RiskCD/risk.ico Risk.png
+            echo "Converting RiskCD/risk.ico to Risk32.png"
+            convert RiskCD/risk.ico Risk32.png
+
+            echo "Upscaling Risk32.png to 64x64 in Risk64.png"
+            upscayl -i Risk32.png -o Risk64.png -s 2
+
+            echo "Upscaling Risk32.png to 128x128 in Risk128.png"
+            upscayl -i Risk32.png -o Risk128.png -s 4
+
+            echo "Upscaling Risk32.png to 256x256 in Risk256.png"
+            upscayl -i Risk32.png -o Risk256.png -s 8
 
             echo "Creating directory /app/share/icons/hicolor/32x32/apps"
             mkdir -p /app/share/icons/hicolor/32x32/apps
 
-            echo "Moving Risk.png to /app/share/icons/hicolor/32x32/apps/Risk.png"
-            mv Risk.png /app/share/icons/hicolor/32x32/apps/Risk.png
+            echo "Moving Risk32.png to /app/share/icons/hicolor/32x32/apps/Risk.png"
+            mv Risk32.png /app/share/icons/hicolor/32x32/apps/Risk.png
+
+            echo "Moving Risk64.png to /app/share/icons/hicolor/64x64/apps/Risk.png"
+            mv Risk64.png /app/share/icons/hicolor/64x64/apps/Risk.png
+
+            echo "Moving Risk128.png to /app/share/icons/hicolor/128x128/apps/Risk.png"
+            mv Risk128.png /app/share/icons/hicolor/128x128/apps/Risk.png
+
+            echo "Moving Risk256.png to /app/share/icons/hicolor/256x256/apps/Risk.png"
+            mv Risk256.png /app/share/icons/hicolor/256x256/apps/Risk.png
       # Script that sets up Wine and installs Risk if it's not already
       - type: script
         commands:
