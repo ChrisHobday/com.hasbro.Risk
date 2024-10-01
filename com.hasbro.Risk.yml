@@ -28,54 +28,18 @@ inherit-extensions:
   - org.winehq.Wine.mono
   - org.winehq.Wine.DLLs
 modules:
-  # Icoutils, needed for extracting .ico from Risk Classic Collection.exe
+  # Icoutils, needed for extracting .ico from .exe
   - name: Icoutils
-    buildsystem: simple
-    sources:
-      - type: archive
-        url: http://savannah.nongnu.org/download/icoutils/icoutils-0.32.3.tar.bz2
-        sha256: 17abe02d043a253b68b47e3af69c9fc755b895db68fdc8811786125df564c6e0
-    build-commands:
-      - |
-        echo "Configuring and make Icoutls"
-        ./configure --prefix=${FLATPAK_DEST}
-        make
-
-        echo "Installing Icoutils"
-        make install
-    cleanup:
-      - '*'
-  # ImageMagick, needed for converting .ico extracted from exe to .png
+  - WineModules/Icoutils.json
+  
+  # ImageMagick, needed for converting extracted .ico from .exe to .png
   - name: ImageMagick
-    buildsystem: simple
-    sources:
-      - type: git
-        url: https://github.com/ImageMagick/ImageMagick.git
-        tag: 7.1.1-36
-    build-commands:
-      - |
-        echo "Configuring and make ImageMagick"
-        ./configure --prefix=${FLATPAK_DEST}
-        make
+  - WineModules/ImageMagick.json
 
-        echo "Installing ImageMagick"
-        make install
-    cleanup:
-      - '*'
-  # Upscayl, needed for upscaling png to higher resolutions
+  # Upscayl, needed for upscaling .png
   - name: Upscayl
-    buildsystem: simple
-    sources:
-      - type: archive
-        url: https://github.com/upscayl/upscayl/releases/download/v2.11.5/upscayl-2.11.5-linux.zip
-        sha256: 7570a3e9a803480952d611662f5e5af8fc6cce00bcbff51dea3fc8e7b0cf3890
-        dest: Upscayl
-    build-commands:
-      - |
-        mv Upscayl/bin/upscayl-bin /app/bin/upscayl
-        mv Upscayl/models /app/bin
-    cleanup:
-      - '*'
+  - WineModules/Upscayl.json
+
   # Risk installer files, icon and desktop file creation shell scripts, and wrapper script for launching
   - name: Risk
     buildsystem: simple
@@ -83,9 +47,11 @@ modules:
       # Metadata file for Flatpak repos
       - type: file
         path: com.hasbro.Risk.metainfo.xml
+
       # Desktop file for Risk
       - type: file
         path: Risk.desktop
+
       # Risk CD/ISO
       - type: archive
         archive-type: 7z
@@ -93,16 +59,20 @@ modules:
         url: https://archive.org/download/risk96/RISK.iso
         sha256: 1f11da4878707a2ebb4d5e3c6ea9cbb14a14875f245300dc5b3ca21026d11387
         dest: RiskCD
+
       # RISK.EXE 1.1 patch
       - type: archive
         url: https://d2.myabandonware.com/t/cff71cd4-570b-4179-85f1-32b9879f69c3/Risk-The-Game-of-Global-Domination_Patch_Win_EN_Patch-11.zip
         sha256: 2e95abf393f93cc90d8ca6b6898cb4290ef82bccb872049725619d4f1b39b33e
+
       # Windows registry file that sets Risk paths
       - type: file
         path: Risk.reg
+
       # Windows registry file that sets Wine to grab cursor in fullscreen, emulate a virtual desktop and set desktop resolution
       - type: file
         path: WineGraphics.reg
+
       # Shell script that extracts Risk icon from the Risk Classic Collection.exe, converts/upscales it to different sized png files and move those to the correct icon locations
       - type: shell
         commands:
@@ -133,6 +103,7 @@ modules:
 
             echo "Moving Risk256.png to /app/share/icons/hicolor/256x256/apps/Risk.png"
             mv Risk256.png /app/share/icons/hicolor/256x256/apps/Risk.png
+
       # Script that sets up Wine and installs Risk if it's not already
       - type: script
         commands:
@@ -165,6 +136,7 @@ modules:
               sleep 3
             fi
         dest-filename: RiskInstaller
+
       # Script that changes to installation directory of Risk and launches it with Wine
       - type: script
         commands:
@@ -175,7 +147,8 @@ modules:
             echo "Launching Risk with Wine"
             wine /var/data/WinePrefix/drive_c/Games/Risk/risk.exe
         dest-filename: RiskLauncher
-        # Script that is ran when Flatpak launches, which starts GameScope in fullscreen with the SDL backend and then runs the RiskWrapper
+
+      # Script that is ran when Flatpak launches, which starts GameScope in fullscreen with the SDL backend and then runs the RiskWrapper
       - type: script
         commands:
           - |
@@ -185,6 +158,7 @@ modules:
             echo "Running GameScope in fullscreen with NIS upscaling filter and launching the RiskLauncher within"
             gamescope -f --filter nis --backend sdl --expose-wayland -- RiskLauncher
         dest-filename: GameScopeWrapper
+            
     build-commands:
       - |
         echo "Installing com.hasbro.Risk.metainfo.xml in /app/share/metainfo/"
