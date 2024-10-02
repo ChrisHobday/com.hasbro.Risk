@@ -1,0 +1,3 @@
+[submodule "WineModules"]
+	path = WineModules
+	url = https://github.com/ChrisHobday/WineModules
